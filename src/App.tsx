@@ -41,9 +41,7 @@ const C = {
 const ADMIN_PINS = ["budi", "fadli"];
 
 const DEFAULT_CATEGORIES = [
-  { id: "trip", label: "Trip & Liburan", isDefault: true },
-  { id: "nongkrong", label: "Nongkrong Malam", isDefault: true },
-  { id: "main", label: "Main Random", isDefault: true },
+ 
 ];
 
 const DEFAULT_MEMBERS = [
