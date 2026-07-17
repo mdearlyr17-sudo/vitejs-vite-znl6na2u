@@ -40,9 +40,7 @@ const C = {
 
 const ADMIN_PINS = ["budi", "fadli"];
 
-const DEFAULT_CATEGORIES = [
- 
-];
+
 
 const DEFAULT_MEMBERS = [
   {
