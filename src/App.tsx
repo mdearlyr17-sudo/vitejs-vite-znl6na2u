@@ -129,14 +129,7 @@ const DEFAULT_MEMORIES = [
   },
 ];
 
-function loadLS(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
+
 
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -295,19 +288,25 @@ export default function App() {
   const crewRef = useRef(null);
   const galeriRef = useRef(null);
 
-  useEffect(
-    () => localStorage.setItem("cdb_members", JSON.stringify(members)),
-    [members]
-  );
-  useEffect(
-    () => localStorage.setItem("cdb_memories", JSON.stringify(memories)),
-    [memories]
-  );
-  useEffect(
-    () => localStorage.setItem("cdb_categories_baru", JSON.stringify(categories)),
-    [categories]
-  );
+  useEffect(() => {
+    const loadData = async () => {
+      const { data: mData } = await supabase.from('members').select('*');
+      if (mData) setMembers(mData);
+      const { data: memData } = await supabase.from('memories').select('*');
+      if (memData) setMemories(memData);
+    };
+    loadData();
 
+    // Dengerin perubahan tabel 'members'
+    const channel1 = supabase.channel('members').on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, loadData).subscribe();
+    // Dengerin perubahan tabel 'memories'
+    const channel2 = supabase.channel('memories').on('postgres_changes', { event: '*', schema: 'public', table: 'memories' }, loadData).subscribe();
+
+    return () => {
+      supabase.removeChannel(channel1);
+      supabase.removeChannel(channel2);
+    };
+  }, []);
   const scrollTo = (ref) => ref.current?.scrollIntoView({ behavior: "smooth" });
 
   const categoryById = (id) => categories.find((c) => c.id === id);
@@ -957,15 +956,26 @@ function MemberForm({ initial, onSave }) {
     setPhoto(await fileToDataUrl(file));
   };
 
-  const submit = (e) => {
+  // Tambahkan 'async' di sini
+  const submit = async (e) => { 
     e.preventDefault();
     if (!name.trim()) return;
-    onSave({
+
+    // Persiapkan data
+    const memberData = {
       name: name.trim(),
-      photo:
-        photo ||
-        `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`,
-    });
+      photo: photo || `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`,
+    };
+
+    // KIRIM KE SUPABASE
+    const { error } = await supabase.from('members').insert([memberData]);
+    
+    if (error) {
+      alert("Gagal simpan ke Supabase: " + error.message);
+    } else {
+      // Kalau berhasil, tutup modal
+      onSave(memberData); 
+    }
   };
 
   return (
@@ -1035,20 +1045,28 @@ function MemoryForm({ categories, initial, onSave }) {
   const removePhoto = (idx) =>
     setPhotos((prev) => prev.filter((_, i) => i !== idx));
 
-  const submit = (e) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    onSave({
-      title: title.trim(),
-      category,
-      location: location.trim() || "Lokasi belum diisi",
-      date: date.trim() || "Tanggal belum diisi",
-      cover:
-        cover ||
-        `https://picsum.photos/seed/${encodeURIComponent(title)}/700/900`,
-      photos,
-    });
+ // Di dalam MemoryForm, ganti fungsi submit jadi:
+ const submit = async (e) => {
+  e.preventDefault();
+  if (!title.trim()) return;
+
+  const memoryData = {
+    title: title.trim(),
+    category,
+    location: location.trim() || "Lokasi belum diisi",
+    date: date.trim() || "Tanggal belum diisi",
+    cover: cover || `https://picsum.photos/seed/${encodeURIComponent(title)}/700/900`,
+    photos,
   };
+
+  const { error } = await supabase.from('memories').insert([memoryData]);
+
+  if (error) {
+    alert("Gagal simpan memori: " + error.message);
+  } else {
+    onSave(memoryData); // Menutup modal
+  }
+};
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
