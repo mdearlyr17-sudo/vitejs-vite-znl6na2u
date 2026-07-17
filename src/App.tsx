@@ -1,29 +1,3 @@
-// 1. State Daftar Kategori (Otomatis nyimpan ke LocalStorage biar gak hilang pas di-refresh)
-const [kategoriList, setKategoriList] = useState(() => {
-  const saved = localStorage.getItem('cdb_kategori');
-  return saved ? JSON.parse(saved) : ['Nongkrong', 'Touring', 'Mabar Game', 'Projek Brutal'];
-});
-
-// 2. State buat nampung ketikan nama kategori baru
-const [kategoriBaru, setKategoriBaru] = useState("");
-
-// Fungsi Tambah Kategori
-const handleTambahKategori = (e: any) => {
-  e.preventDefault();
-  if (!kategoriBaru.trim()) return; // Kalo kosong jangan ditambahin
-  
-  const updateList = [...kategoriList, kategoriBaru];
-  setKategoriList(updateList);
-  localStorage.setItem('cdb_kategori', JSON.stringify(updateList)); // Simpan permanen
-  setKategoriBaru(""); // Kosongin kotak input lagi
-};
-
-// Fungsi Hapus Kategori
-const handleHapusKategori = (indexHapus: number) => {
-  const updateList = kategoriList.filter((_, index) => index !== indexHapus);
-  setKategoriList(updateList);
-  localStorage.setItem('cdb_kategori', JSON.stringify(updateList)); // Update simpanan
-};
 
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
