@@ -264,15 +264,10 @@ const inputStyle = {
 const btnPrimary = { background: C.accent, color: C.bg };
 
 export default function App() {
-  const [members, setMembers] = useState(() =>
-    loadLS("cdb_members", DEFAULT_MEMBERS)
-  );
-  const [memories, setMemories] = useState(() =>
-    loadLS("cdb_memories", DEFAULT_MEMORIES)
-  );
-  const [categories, setCategories] = useState(() =>
-    loadLS("cdb_categories_baru", DEFAULT_CATEGORIES)
-  );
+  const [members, setMembers] = useState([]);
+  const [memories, setMemories] = useState([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  
   const [filter, setFilter] = useState("semua");
   const [isAdmin, setIsAdmin] = useState(false);
 
