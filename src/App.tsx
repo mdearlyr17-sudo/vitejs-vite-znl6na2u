@@ -316,10 +316,10 @@ export default function App() {
     return cat.label.split(" ")[0].toUpperCase();
   };
 
-  const visibleMemories =
-    filter === "semua"
-      ? memories
-      : memories.filter((m) => m.category === filter);
+  // Ganti bagian ini:
+const visibleMemories = memories && memories.length > 0
+? (filter === "semua" ? memories : memories.filter((m) => m.category === filter))
+: [];
 
   const handleDeleteMember = (id) => {
     if (window.confirm("Hapus member ini dari Cemara Divisi Brutal?")) {
