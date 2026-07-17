@@ -271,7 +271,7 @@ export default function App() {
     loadLS("cdb_memories", DEFAULT_MEMORIES)
   );
   const [categories, setCategories] = useState(() =>
-    loadLS("cdb_categories", DEFAULT_CATEGORIES)
+    loadLS("cdb_categories_baru", DEFAULT_CATEGORIES)
   );
   const [filter, setFilter] = useState("semua");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -297,7 +297,7 @@ export default function App() {
     [memories]
   );
   useEffect(
-    () => localStorage.setItem("cdb_categories", JSON.stringify(categories)),
+    () => localStorage.setItem("cdb_categories_baru", JSON.stringify(categories)),
     [categories]
   );
 
