@@ -1011,19 +1011,48 @@ function MemoryForm({ categories, initial, onSave }) {
   const [date, setDate] = useState(initial?.date ?? "");
   const [cover, setCover] = useState(initial?.cover ?? "");
   const [photos, setPhotos] = useState(initial?.photos ?? []);
+  
+  // Tambahkan fungsi ini di dalam MemoryForm
+const uploadToDrive = async (file) => {
+  const reader = new FileReader();
+  return new Promise((resolve, reject) => {
+    reader.readAsDataURL(file);
+    reader.onloadend = async () => {
+      const base64data = reader.result.split(',')[1];
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwUXlCwVe4R9KIKBxSd69xZ3Db4W3zg2BavEVhygKe_BX_azPBd3rRziCXhgnAIiLnQ/exec", { // <--- GANTI URL DI SINI
+          method: "POST",
+          body: JSON.stringify({
+            data: base64data,
+            filename: file.name,
+            mimetype: file.type
+          })
+        });
+        const result = await response.text();
+        resolve(result.replace("File berhasil diupload! URL: ", ""));
+      } catch (error) {
+        reject(error);
+      }
+    };
+  });
+};
 
-  const handleCoverFile = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setCover(await fileToDataUrl(file));
-  };
+const handleCoverFile = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  // Ini akan mengubah proses dari lokal (base64) ke upload ke Drive
+  const driveUrl = await uploadToDrive(file);
+  setCover(driveUrl); 
+};
 
-  const handleGalleryFiles = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    const dataUrls = await Promise.all(files.map(fileToDataUrl));
-    setPhotos((prev) => [...prev, ...dataUrls]);
-  };
+const handleGalleryFiles = async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  
+  // Upload semua file ke drive satu per satu
+  const driveUrls = await Promise.all(files.map(uploadToDrive));
+  setPhotos((prev) => [...prev, ...driveUrls]);
+};
 
   const removePhoto = (idx) =>
     setPhotos((prev) => prev.filter((_, i) => i !== idx));
