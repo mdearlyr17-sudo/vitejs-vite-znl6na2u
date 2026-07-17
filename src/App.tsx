@@ -40,7 +40,10 @@ const C = {
 
 const ADMIN_PINS = ["budi", "fadli"];
 
-
+const DEFAULT_CATEGORIES = [
+  { id: "trip", label: "Trip ", isDefault: true },
+  
+];
 
 const DEFAULT_MEMBERS = [
   {
