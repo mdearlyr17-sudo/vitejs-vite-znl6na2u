@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { createClient } from '@supabase/supabase-js';
 
 // Ganti dengan URL dan KEY lo dari dashboard Supabase
-const supabaseUrl = 'URL_SUPABASE_LO'; 
-const supabaseAnonKey = 'KEY_ANON_PUBLIC_LO'; 
+const supabaseUrl = 'https://cowhnlntimqkpguwrlxh.supabase.co'; 
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd2hubG50aW1xa3BndXdybHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzE2NTgsImV4cCI6MjA5OTg0NzY1OH0.llNQaxrEBIaSfQMwDkicC-dWqvJUsIc3LXbPqxSk1IQ'; 
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 import {
