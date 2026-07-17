@@ -37,7 +37,7 @@ const C = {
   pine: "#4A6B4E",
 };
 
-const ADMIN_PINS = ["brutal", "1234"];
+const ADMIN_PINS = ["budi", "fadli"];
 
 const DEFAULT_CATEGORIES = [
   { id: "trip", label: "Trip & Liburan", isDefault: true },
