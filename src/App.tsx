@@ -664,7 +664,7 @@ const visibleMemories = memories && memories.length > 0
               className="font-mono text-xs tracking-[0.3em] uppercase font-bold"
               style={{ color: C.textMuted }}
             >
-              Galeri Memori
+              Album
             </h2>
           </div>
           {isAdmin && (
