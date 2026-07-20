@@ -920,39 +920,86 @@ const visibleMemories = memories && memories.length > 0
         />
       </Modal>
 
-      {/* GALLERY MODAL */}
+      {/* ================= 1. GALLERY MODAL ================= */}
       <Modal
         open={!!galleryItem}
         onClose={() => setGalleryItem(null)}
         title={galleryItem?.title ?? ""}
       >
+        {galleryItem && (
+          <div>
+            <div
+              className="flex flex-col gap-1 font-mono text-[11px] mb-4"
+              style={{ color: C.textMuted }}
+            >
+              <span className="flex items-center gap-1.5">
+                <MapPin size={12} /> {galleryItem.location}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar size={12} /> {galleryItem.date}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[galleryItem.cover, ...galleryItem.photos].map((src, i) => (
+                <div
+                  key={i}
+                  className="aspect-square overflow-hidden cursor-pointer group"
+                  style={{ border: `1px solid ${C.border}` }}
+                  onClick={() => setZoomedImage(src)}
+                >
+                  <img
+                    src={src}
+                    alt=""
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+              ))}
+            </div>
+            {galleryItem?.youtube_url && (
+              <div className="mb-4 aspect-video w-full overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYouTubeId(galleryItem.youtube_url)}`}
+                  title="YouTube video player"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* ================= 2. LIGHTBOX ZOOM FOTO ================= */}
       {zoomedImage && (
-  <div
-    className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300"
-    style={{ background: "rgba(6,8,6,0.95)" }}
-    onClick={() => setZoomedImage(null)}
-  >
-    <button
-      onClick={() => setZoomedImage(null)}
-      className="absolute top-5 right-5 p-2.5 rounded-full transition-transform hover:scale-110"
-      style={{
-        background: C.surface,
-        color: C.text,
-        border: `1px solid ${C.borderStrong}`,
-      }}
-    >
-      <X size={24} />
-    </button>
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300"
+          style={{ background: "rgba(6,8,6,0.95)" }}
+          onClick={() => setZoomedImage(null)}
+        >
+          <button
+            onClick={() => setZoomedImage(null)}
+            className="absolute top-5 right-5 p-2.5 rounded-full transition-transform hover:scale-110"
+            style={{
+              background: C.surface,
+              color: C.text,
+              border: `1px solid ${C.borderStrong}`,
+            }}
+          >
+            <X size={24} />
+          </button>
 
-    <img
-      src={zoomedImage}
-      alt="Zoomed memory"
-      className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
-      onClick={(e) => e.stopPropagation()}
-    />
+          <img
+            src={zoomedImage}
+            alt="Zoomed memory"
+            className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
-    {/* ================= MODAL ADD / EDIT PLAN ================= */}
-    <Modal
+      {/* ================= 3. MODAL ADD / EDIT PLAN ================= */}
+      <Modal
         open={planModal || !!editPlan}
         onClose={() => {
           setPlanModal(false);
@@ -964,22 +1011,20 @@ const visibleMemories = memories && memories.length > 0
           initial={editPlan}
           onSave={(data) => {
             if (editPlan) {
-              // Kalau edit, update data di layar
               setPlans((prev) =>
                 prev.map((p) => (p.id === editPlan.id ? data : p))
               );
             } else {
-              // Kalau tambah baru, taruh di paling atas
               setPlans((prev) => [data, ...prev]);
             }
-            // Tutup modal setelah berhasil simpan
             setPlanModal(false);
             setEditPlan(null);
           }}
         />
       </Modal>
-  </div>
-)}
+    </div>
+  );
+}
         {galleryItem && (
           <div>
             <div
@@ -1023,10 +1068,7 @@ const visibleMemories = memories && memories.length > 0
 )}
           </div>
         )}
-      </Modal>
-    </div>
-  );
-}
+      
 
 function PinForm({ onSuccess }) {
   const [pin, setPin] = useState("");
