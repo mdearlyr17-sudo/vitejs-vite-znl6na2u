@@ -284,6 +284,7 @@ export default function App() {
   const [memoryModal, setMemoryModal] = useState(false);
   const [categoryModal, setCategoryModal] = useState(false);
   const [galleryItem, setGalleryItem] = useState(null);
+  const [zoomedImage, setZoomedImage] = useState(null);
   const [editMember, setEditMember] = useState(null);
   const [editMemory, setEditMemory] = useState(null);
 
@@ -835,6 +836,32 @@ const visibleMemories = memories && memories.length > 0
         onClose={() => setGalleryItem(null)}
         title={galleryItem?.title ?? ""}
       >
+      {zoomedImage && (
+  <div
+    className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300"
+    style={{ background: "rgba(6,8,6,0.95)" }}
+    onClick={() => setZoomedImage(null)}
+  >
+    <button
+      onClick={() => setZoomedImage(null)}
+      className="absolute top-5 right-5 p-2.5 rounded-full transition-transform hover:scale-110"
+      style={{
+        background: C.surface,
+        color: C.text,
+        border: `1px solid ${C.borderStrong}`,
+      }}
+    >
+      <X size={24} />
+    </button>
+
+    <img
+      src={zoomedImage}
+      alt="Zoomed memory"
+      className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
+      onClick={(e) => e.stopPropagation()}
+    />
+  </div>
+)}
         {galleryItem && (
           <div>
             <div
@@ -854,11 +881,12 @@ const visibleMemories = memories && memories.length > 0
                   key={i}
                   className="aspect-square overflow-hidden"
                   style={{ border: `1px solid ${C.border}` }}
-                >
+                >onClick={() => setZoomedImage(src)} // 
+                
                   <img
                     src={src}
                     alt=""
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" // <--- Bonus: efek zoom dikit pas kursor lewat
                   />
                 </div>
               ))}
