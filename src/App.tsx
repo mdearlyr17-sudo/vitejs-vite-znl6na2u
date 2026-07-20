@@ -287,6 +287,9 @@ export default function App() {
   const [zoomedImage, setZoomedImage] = useState(null);
   const [editMember, setEditMember] = useState(null);
   const [editMemory, setEditMemory] = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [planModal, setPlanModal] = useState(false);
+  const [editPlan, setEditPlan] = useState(null);
 
   const heroRef = useRef(null);
   const crewRef = useRef(null);
@@ -298,19 +301,26 @@ export default function App() {
       if (mData) setMembers(mData);
       const { data: memData } = await supabase.from('memories').select('*');
       if (memData) setMemories(memData);
+      
+      // ---> TAMBAHIN YANG INI <---
+      const { data: pData } = await supabase.from('plans').select('*');
+      if (pData) setPlans(pData);
     };
     loadData();
 
-    // Dengerin perubahan tabel 'members'
     const channel1 = supabase.channel('members').on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, loadData).subscribe();
-    // Dengerin perubahan tabel 'memories'
     const channel2 = supabase.channel('memories').on('postgres_changes', { event: '*', schema: 'public', table: 'memories' }, loadData).subscribe();
+    // ---> TAMBAHIN YANG INI <---
+    const channel3 = supabase.channel('plans').on('postgres_changes', { event: '*', schema: 'public', table: 'plans' }, loadData).subscribe();
 
     return () => {
       supabase.removeChannel(channel1);
       supabase.removeChannel(channel2);
+      supabase.removeChannel(channel3); // <--- Jangan lupa di-remove
     };
   }, []);
+
+
   const scrollTo = (ref) => ref.current?.scrollIntoView({ behavior: "smooth" });
 
   const categoryById = (id) => categories.find((c) => c.id === id);
@@ -357,6 +367,14 @@ const visibleMemories = memories && memories.length > 0
       }
     }
   };
+
+  const handleDeletePlan = async (id) => {
+    if (window.confirm("Hapus Plan ini?")) {
+      await supabase.from('plans').delete().eq('id', id);
+      setPlans((prev) => prev.filter((p) => p.id !== id));
+    }
+  };
+
   const handleDeleteCategory = (id) => {
     const inUse = memories.some((m) => m.category === id);
     const msg = inUse
@@ -524,6 +542,58 @@ const visibleMemories = memories && memories.length > 0
           ))}
         </div>
       </div>
+      
+      {/* ================= SECTION NEXT PLAN ================= */}
+      <section className="max-w-6xl mx-auto px-5 py-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2 font-mono text-xs tracking-[0.3em] uppercase font-bold" style={{ color: C.textMuted }}>
+            <span className="w-2 h-2 rounded-full animate-ping" style={{ background: C.accent }}></span>
+            Next Plan
+          </div>
+          {isAdmin && (
+            <button
+              onClick={() => { setEditPlan(null); setPlanModal(true); }}
+              className="font-mono text-[11px] uppercase tracking-widest font-bold px-3 py-1.5 flex items-center gap-1"
+              style={btnPrimary}
+            >
+              <Plus size={12} /> Tambah Plan
+            </button>
+          )}
+        </div>
+
+        {plans.length === 0 ? (
+          <div className="p-8 text-center font-mono text-sm cdb-dashed" style={{ color: C.textMuted }}>
+            Belum ada Plan / Agenda terdekat. Santai dulu, kumpulkan tenaga buat brutal selanjutnya! ⚡
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {plans.map((p) => (
+              <div key={p.id} className="cdb-card relative p-6 text-left" style={{ background: C.surface, border: `1px solid ${C.border}` }}>
+                {isAdmin && (
+                  <AdminControls
+                    onEdit={() => setEditPlan(p)}
+                    onDelete={() => handleDeletePlan(p.id)}
+                  />
+                )}
+                <StampBadge rotate={-3} tone="accent">ACTIVE PLAN</StampBadge>
+                
+                <h3 className="font-display text-2xl md:text-3xl uppercase mb-2 mt-2" style={{ color: C.text }}>
+                  {p.title}
+                </h3>
+
+                <div className="flex flex-wrap gap-4 font-mono text-xs my-3" style={{ color: C.textMuted }}>
+                  <span className="flex items-center gap-1.5"><MapPin size={14} style={{ color: C.accent }} /> {p.location}</span>
+                  <span className="flex items-center gap-1.5"><Calendar size={14} style={{ color: C.accent }} /> {p.date_text}</span>
+                </div>
+
+                {/* TIMER COUNTDOWN */}
+                <CountdownTimer targetDate={p.target_date} />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+      {/* ================= END SECTION NEXT PLAN ================= */}
 
       {/* THE CREW */}
       <section ref={crewRef} className="max-w-6xl mx-auto px-5 py-16">
@@ -880,6 +950,34 @@ const visibleMemories = memories && memories.length > 0
       className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
       onClick={(e) => e.stopPropagation()}
     />
+
+    {/* ================= MODAL ADD / EDIT PLAN ================= */}
+    <Modal
+        open={planModal || !!editPlan}
+        onClose={() => {
+          setPlanModal(false);
+          setEditPlan(null);
+        }}
+        title={editPlan ? "Edit Plan" : "Tambah Next Plan"}
+      >
+        <PlanForm
+          initial={editPlan}
+          onSave={(data) => {
+            if (editPlan) {
+              // Kalau edit, update data di layar
+              setPlans((prev) =>
+                prev.map((p) => (p.id === editPlan.id ? data : p))
+              );
+            } else {
+              // Kalau tambah baru, taruh di paling atas
+              setPlans((prev) => [data, ...prev]);
+            }
+            // Tutup modal setelah berhasil simpan
+            setPlanModal(false);
+            setEditPlan(null);
+          }}
+        />
+      </Modal>
   </div>
 )}
         {galleryItem && (
@@ -1004,6 +1102,134 @@ function CategoryForm({ onSave }) {
         style={btnPrimary}
       >
         Simpan
+      </button>
+    </form>
+  );
+}
+
+// 1. KOMPONEN HITUNG MUNDUR (COUNTDOWN TIMER)
+function CountdownTimer({ targetDate }) {
+  const [timeLeft, setTimeLeft] = useState({ hari: 0, jam: 0, menit: 0, detik: 0 });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const target = new Date(targetDate).getTime();
+      const selisih = target - now;
+
+      if (selisih < 0) {
+        clearInterval(interval);
+        setTimeLeft({ hari: 0, jam: 0, menit: 0, detik: 0 });
+      } else {
+        setTimeLeft({
+          hari: Math.floor(selisih / (1000 * 60 * 60 * 24)),
+          jam: Math.floor((selisih % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          menit: Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60)),
+          detik: Math.floor((selisih % (1000 * 60)) / 1000),
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  return (
+    <div className="grid grid-cols-4 gap-2 my-4 text-center font-mono">
+      {Object.entries(timeLeft).map(([label, angka]) => (
+        <div key={label} className="p-2" style={{ background: C.bgAlt, border: `1px solid ${C.borderStrong}` }}>
+          <span className="block text-xl md:text-2xl font-bold" style={{ color: C.accent }}>
+            {String(angka).padStart(2, "0")}
+          </span>
+          <span className="text-[10px] uppercase tracking-widest" style={{ color: C.textMuted }}>
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// 2. KOMPONEN FORM BUAT ADMIN INPUT PLAN BARU
+function PlanForm({ initial, onSave }) {
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [location, setLocation] = useState(initial?.location ?? "");
+  const [dateText, setDateText] = useState(initial?.date_text ?? "");
+  const [targetDate, setTargetDate] = useState(initial?.target_date ?? "");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!title.trim() || !targetDate) {
+      alert("Judul dan Tanggal Target (buat timer) wajib diisi ya bang!");
+      return;
+    }
+
+    const planData = {
+      id: initial?.id ?? `p${Date.now()}`,
+      title: title.trim(),
+      location: location.trim() || "Lokasi belum ditentukan",
+      date_text: dateText.trim() || "Tanggal belum ditentukan",
+      target_date: targetDate,
+    };
+
+    // Upsert (kalau udah ada di-edit, kalau belum di-insert)
+    const { error } = await supabase.from('plans').upsert([planData]);
+
+    if (error) {
+      alert("Gagal simpan plan: " + error.message);
+    } else {
+      onSave(planData);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-4">
+      <div>
+        <FieldLabel>Nama Plan / Agenda</FieldLabel>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full px-3 py-2.5 text-sm outline-none"
+          style={inputStyle}
+          placeholder="cth. Ekspedisi Gunung Gede"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <FieldLabel>Lokasi</FieldLabel>
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full px-3 py-2.5 text-sm outline-none"
+            style={inputStyle}
+            placeholder="cth. Cibodas"
+          />
+        </div>
+        <div>
+          <FieldLabel>Teks Tanggal (Buat Ditampilkan)</FieldLabel>
+          <input
+            value={dateText}
+            onChange={(e) => setDateText(e.target.value)}
+            className="w-full px-3 py-2.5 text-sm outline-none"
+            style={inputStyle}
+            placeholder="cth. 17 Agustus 2026"
+          />
+        </div>
+      </div>
+      <div>
+        <FieldLabel>Waktu Target (Buat Hitung Mundur / Timer)</FieldLabel>
+        <input
+          type="datetime-local"
+          value={targetDate}
+          onChange={(e) => setTargetDate(e.target.value)}
+          className="w-full px-3 py-2.5 text-sm outline-none font-mono"
+          style={inputStyle}
+        />
+        <span className="text-[10px] block mt-1" style={{ color: C.textMuted }}>
+          *Timer countdown bakal otomatis ngitung ke jam & tanggal yang dipilih ini.
+        </span>
+      </div>
+      <button type="submit" className="font-mono text-xs uppercase tracking-widest font-bold py-3" style={btnPrimary}>
+        Simpan Plan
       </button>
     </form>
   );
