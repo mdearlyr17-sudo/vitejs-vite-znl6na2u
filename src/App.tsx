@@ -563,7 +563,7 @@ const visibleMemories = memories && memories.length > 0
 
         {plans.length === 0 ? (
           <div className="p-8 text-center font-mono text-sm cdb-dashed" style={{ color: C.textMuted }}>
-            Belum ada Plan / Agenda terdekat. Santai dulu, kumpulkan tenaga buat brutal selanjutnya! ⚡
+            Belum ada Plan / Agenda terdekat!!! 
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
