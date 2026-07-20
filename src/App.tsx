@@ -879,14 +879,14 @@ const visibleMemories = memories && memories.length > 0
               {[galleryItem.cover, ...galleryItem.photos].map((src, i) => (
                 <div
                   key={i}
-                  className="aspect-square overflow-hidden"
+                  className="aspect-square overflow-hidden cursor-pointer group"
                   style={{ border: `1px solid ${C.border}` }}
-                >onClick={() => setZoomedImage(src)} // 
-                
+                  onClick={() => setZoomedImage(src)}
+                >
                   <img
                     src={src}
                     alt=""
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" // <--- Bonus: efek zoom dikit pas kursor lewat
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
               ))}
