@@ -325,18 +325,38 @@ const visibleMemories = memories && memories.length > 0
 ? (filter === "semua" ? memories : memories.filter((m) => m.category === filter))
 : [];
 
-  const handleDeleteMember = (id) => {
+  // Tambahkan 'async' dan perintah supabase.delete()
+  const handleDeleteMember = async (id) => {
     if (window.confirm("Hapus member ini dari Cemara Divisi Brutal?")) {
-      setMembers((prev) => prev.filter((m) => m.id !== id));
+      // 1. Hapus dulu dari database server Supabase
+      const { error } = await supabase
+        .from('members')
+        .delete()
+        .eq('id', id); // <--- Cari yang id-nya sama dengan yang diklik
+
+      if (error) {
+        alert("Gagal menghapus dari Supabase: " + error.message);
+      } else {
+        // 2. Kalau di server berhasil terhapus, baru hapus dari layar
+        setMembers((prev) => prev.filter((m) => m.id !== id));
+      }
     }
   };
 
-  const handleDeleteMemory = (id) => {
+  const handleDeleteMemory = async (id) => {
     if (window.confirm("Hapus dokumentasi ini?")) {
-      setMemories((prev) => prev.filter((m) => m.id !== id));
+      const { error } = await supabase
+        .from('memories')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert("Gagal menghapus dokumentasi: " + error.message);
+      } else {
+        setMemories((prev) => prev.filter((m) => m.id !== id));
+      }
     }
   };
-
   const handleDeleteCategory = (id) => {
     const inUse = memories.some((m) => m.category === id);
     const msg = inUse
