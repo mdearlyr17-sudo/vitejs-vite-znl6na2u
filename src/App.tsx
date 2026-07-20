@@ -150,6 +150,14 @@ function slugify(label) {
   );
 }
 
+// ---> TAMBAHKAN FUNGSI INI DI SINI <---
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
+
 function StampBadge({ children, rotate = -6, tone = "accent" }) {
   const bg = tone === "accent" ? C.accent : C.pine;
   return (
@@ -855,6 +863,18 @@ const visibleMemories = memories && memories.length > 0
                 </div>
               ))}
             </div>
+            {/* Tambahkan ini di dalam Modal Gallery */}
+{galleryItem?.youtube_url && (
+  <div className="mb-4 aspect-video w-full overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+    <iframe
+      src={`https://www.youtube.com/embed/${extractYouTubeId(galleryItem.youtube_url)}`}
+      title="YouTube video player"
+      className="w-full h-full"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    ></iframe>
+  </div>
+)}
           </div>
         )}
       </Modal>
@@ -1023,6 +1043,8 @@ function MemoryForm({ categories, initial, onSave }) {
   const [date, setDate] = useState(initial?.date ?? "");
   const [cover, setCover] = useState(initial?.cover ?? "");
   const [photos, setPhotos] = useState(initial?.photos ?? []);
+  const [youtubeUrl, setYoutubeUrl] = useState(initial?.youtube_url ?? "");
+
 
   const handleCoverFile = async (e) => {
     const file = e.target.files?.[0];
@@ -1052,6 +1074,7 @@ function MemoryForm({ categories, initial, onSave }) {
     date: date.trim() || "Tanggal belum diisi",
     cover: cover || `https://picsum.photos/seed/${encodeURIComponent(title)}/700/900`,
     photos,
+    youtube_url: youtubeUrl.trim(), // <--- Tambahin ini
   };
 
   const { error } = await supabase.from('memories').insert([memoryData]);
@@ -1111,6 +1134,17 @@ function MemoryForm({ categories, initial, onSave }) {
             placeholder="cth. Jun 2026"
           />
         </div>
+            
+      <div>
+        <FieldLabel>Link YouTube (Opsional)</FieldLabel>
+        <input
+          value={youtubeUrl}
+          onChange={(e) => setYoutubeUrl(e.target.value)}
+          className="w-full px-3 py-2.5 text-sm outline-none"
+          style={inputStyle}
+          placeholder="cth. https://youtube.com/watch?v=..."
+        />
+      </div>
       </div>
       <div>
         <FieldLabel>Simpan Foto Sampul dari Perangkat</FieldLabel>
