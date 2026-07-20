@@ -1367,6 +1367,7 @@ function MemoryForm({ categories, initial, onSave }) {
     if (!file) return;
     setCover(await fileToDataUrl(file));
   };
+  
 
   const handleGalleryFiles = async (e) => {
     const files = Array.from(e.target.files || []);
