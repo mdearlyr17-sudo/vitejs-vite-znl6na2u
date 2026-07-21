@@ -926,33 +926,46 @@ const visibleMemories = memories && memories.length > 0
         onClose={() => setGalleryItem(null)}
         title={galleryItem?.title ?? ""}
       >
+        {galleryItem && (
+          <div>
+            {/* ... ISI GALERI LO NGGAK USAH DIUBAH ... */}
+          </div>
+        )}
+      </Modal>
+
+      {/* LIGHTBOX ZOOM FOTO */}
       {zoomedImage && (
-  <div
-    className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300"
-    style={{ background: "rgba(6,8,6,0.95)" }}
-    onClick={() => setZoomedImage(null)}
-  >
-    <button
-      onClick={() => setZoomedImage(null)}
-      className="absolute top-5 right-5 p-2.5 rounded-full transition-transform hover:scale-110"
-      style={{
-        background: C.surface,
-        color: C.text,
-        border: `1px solid ${C.borderStrong}`,
-      }}
-    >
-      <X size={24} />
-    </button>
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300"
+          style={{ background: "rgba(6,8,6,0.95)" }}
+          onClick={() => setZoomedImage(null)}
+        >
+          <button
+            onClick={() => setZoomedImage(null)}
+            className="absolute top-5 right-5 p-2.5 rounded-full transition-transform hover:scale-110"
+            style={{
+              background: C.surface,
+              color: C.text,
+              border: `1px solid ${C.borderStrong}`,
+            }}
+          >
+            <X size={24} />
+          </button>
 
-    <img
-      src={zoomedImage}
-      alt="Zoomed memory"
-      className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
-      onClick={(e) => e.stopPropagation()}
-    />
+          <img
+            src={zoomedImage}
+            alt="Zoomed memory"
+            className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
-    {/* ================= MODAL ADD / EDIT PLAN ================= */}
-    <Modal
+    {/* LIGHTBOX ZOOM FOTO YANG DI LANGKAH 2 ... */}
+
+      {/* ---> PASTE DI SINI BANG! <--- */}
+      {/* ================= MODAL ADD / EDIT PLAN ================= */}
+      <Modal
         open={planModal || !!editPlan}
         onClose={() => {
           setPlanModal(false);
@@ -964,22 +977,21 @@ const visibleMemories = memories && memories.length > 0
           initial={editPlan}
           onSave={(data) => {
             if (editPlan) {
-              // Kalau edit, update data di layar
               setPlans((prev) =>
                 prev.map((p) => (p.id === editPlan.id ? data : p))
               );
             } else {
-              // Kalau tambah baru, taruh di paling atas
               setPlans((prev) => [data, ...prev]);
             }
-            // Tutup modal setelah berhasil simpan
             setPlanModal(false);
             setEditPlan(null);
           }}
         />
       </Modal>
-  </div>
-)}
+
+    </div> /* <--- INI TAG PENUTUP PALING AKHIR DARI FUNGSI App() */
+  );
+}
         {galleryItem && (
           <div>
             <div
@@ -1023,11 +1035,7 @@ const visibleMemories = memories && memories.length > 0
 )}
           </div>
         )}
-      </Modal>
-    </div>
-  );
-}
-
+   
 function PinForm({ onSuccess }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
