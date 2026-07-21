@@ -920,78 +920,12 @@ const visibleMemories = memories && memories.length > 0
         />
       </Modal>
 
-      {/* GALLERY MODAL */}
-      <Modal
+     {/* ================= GALLERY MODAL ================= */}
+     <Modal
         open={!!galleryItem}
         onClose={() => setGalleryItem(null)}
         title={galleryItem?.title ?? ""}
       >
-        {galleryItem && (
-          <div>
-            {/* ... ISI GALERI LO NGGAK USAH DIUBAH ... */}
-          </div>
-        )}
-      </Modal>
-
-      {/* LIGHTBOX ZOOM FOTO */}
-      {zoomedImage && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300"
-          style={{ background: "rgba(6,8,6,0.95)" }}
-          onClick={() => setZoomedImage(null)}
-        >
-          <button
-            onClick={() => setZoomedImage(null)}
-            className="absolute top-5 right-5 p-2.5 rounded-full transition-transform hover:scale-110"
-            style={{
-              background: C.surface,
-              color: C.text,
-              border: `1px solid ${C.borderStrong}`,
-            }}
-          >
-            <X size={24} />
-          </button>
-
-          <img
-            src={zoomedImage}
-            alt="Zoomed memory"
-            className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
-
-    {/* LIGHTBOX ZOOM FOTO YANG DI LANGKAH 2 ... */}
-
-      {/* ---> PASTE DI SINI BANG! <--- */}
-      {/* ================= MODAL ADD / EDIT PLAN ================= */}
-      <Modal
-        open={planModal || !!editPlan}
-        onClose={() => {
-          setPlanModal(false);
-          setEditPlan(null);
-        }}
-        title={editPlan ? "Edit Plan" : "Tambah Next Plan"}
-      >
-        <PlanForm
-          initial={editPlan}
-          onSave={(data) => {
-            if (editPlan) {
-              setPlans((prev) =>
-                prev.map((p) => (p.id === editPlan.id ? data : p))
-              );
-            } else {
-              setPlans((prev) => [data, ...prev]);
-            }
-            setPlanModal(false);
-            setEditPlan(null);
-          }}
-        />
-      </Modal>
-
-    </div> /* <--- INI TAG PENUTUP PALING AKHIR DARI FUNGSI App() */
-  );
-}
         {galleryItem && (
           <div>
             <div
@@ -1021,20 +955,84 @@ const visibleMemories = memories && memories.length > 0
                 </div>
               ))}
             </div>
-            {/* Tambahkan ini di dalam Modal Gallery */}
-{galleryItem?.youtube_url && (
-  <div className="mb-4 aspect-video w-full overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
-    <iframe
-      src={`https://www.youtube.com/embed/${extractYouTubeId(galleryItem.youtube_url)}`}
-      title="YouTube video player"
-      className="w-full h-full"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowFullScreen
-    ></iframe>
-  </div>
-)}
+            {galleryItem?.youtube_url && (
+              <div
+                className="mb-4 aspect-video w-full overflow-hidden mt-3"
+                style={{ border: `1px solid ${C.border}` }}
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYouTubeId(galleryItem.youtube_url)}`}
+                  title="YouTube video player"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            )}
           </div>
         )}
+      </Modal>
+
+      {/* ================= LIGHTBOX ZOOM FOTO ================= */}
+      {zoomedImage && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300"
+          style={{ background: "rgba(6,8,6,0.95)" }}
+          onClick={() => setZoomedImage(null)}
+        >
+          <button
+            onClick={() => setZoomedImage(null)}
+            className="absolute top-5 right-5 p-2.5 rounded-full transition-transform hover:scale-110"
+            style={{
+              background: C.surface,
+              color: C.text,
+              border: `1px solid ${C.borderStrong}`,
+            }}
+          >
+            <X size={24} />
+          </button>
+
+          <img
+            src={zoomedImage}
+            alt="Zoomed memory"
+            className="max-w-full max-h-[88vh] object-contain shadow-2xl rounded-sm select-none"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
+      {/* ================= MODAL ADD / EDIT PLAN ================= */}
+      <Modal
+        open={planModal || !!editPlan}
+        onClose={() => {
+          setPlanModal(false);
+          setEditPlan(null);
+        }}
+        title={editPlan ? "Edit Plan" : "Tambah Next Plan"}
+      >
+        <PlanForm
+          initial={editPlan}
+          onSave={(data) => {
+            if (editPlan) {
+              setPlans((prev) =>
+                prev.map((p) => (p.id === editPlan.id ? data : p))
+              );
+            } else {
+              setPlans((prev) => [data, ...prev]);
+            }
+            setPlanModal(false);
+            setEditPlan(null);
+          }}
+        />
+      </Modal>
+
+    </div> /* <--- INI PENUTUP RESMI FUNGSI App() */
+  );
+}
+
+/* ================= DI BAWAH SINI BARU FUNGSI-FUNGSI LAIN ================= */
+/* (PinForm, CategoryForm, CountdownTimer, PlanForm, MemberForm, MemoryForm) */
+/* Jangan diubah yang bagian bawah ini ya bang */
    
 function PinForm({ onSuccess }) {
   const [pin, setPin] = useState("");
