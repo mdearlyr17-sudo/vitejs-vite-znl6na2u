@@ -1280,14 +1280,25 @@ function MemberForm({ initial, onSave }) {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const memberData = {
-      name: name.trim(),
-      photo: photo || `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`,
+    const submit = async (e) => {
+      e.preventDefault();
+      if (!name.trim()) return;
+  
+      const memberData = {
+        id: initial?.id ?? `m${Date.now()}`, // <--- Tambahin ID
+        name: name.trim(),
+        photo: photo || `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`,
+      };
+  
+      // Ganti jadi .upsert()
+      const { error } = await supabase.from('members').upsert([memberData]);
+      
+      if (error) {
+        alert("Gagal simpan ke Supabase: " + error.message);
+      } else {
+        onSave(memberData); 
+      }
     };
-
-    const { error } = await supabase.from('members').insert([memberData]);
-    if (error) alert("Gagal simpan ke Supabase: " + error.message);
-    else onSave(memberData);
   };
 
   return (
@@ -1397,22 +1408,31 @@ function MemoryForm({ categories, initial, onSave }) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const memoryData = {
-      title: title.trim(),
-      category,
-      location: location.trim() || "Lokasi belum diisi",
-      date: date.trim() || "Tanggal belum diisi",
-      cover: cover || `https://picsum.photos/seed/${encodeURIComponent(title)}/700/900`,
-      photos,
-      youtube_url: youtubeUrl.trim(),
+    const submit = async (e) => {
+      e.preventDefault();
+      if (!title.trim()) return;
+  
+      const memoryData = {
+        // 1. TAMBAHIN BARIS INI: Biar sistem tau ini edit album lama atau bikin album baru
+        id: initial?.id ?? `d${Date.now()}`, 
+        title: title.trim(),
+        category,
+        location: location.trim() || "Lokasi belum diisi",
+        date: date.trim() || "Tanggal belum diisi",
+        cover: cover || `https://picsum.photos/seed/${encodeURIComponent(title)}/700/900`,
+        photos,
+        youtube_url: youtubeUrl.trim(),
+      };
+  
+      // 2. GANTI .insert() JADI .upsert()
+      const { error } = await supabase.from('memories').upsert([memoryData]);
+  
+      if (error) {
+        alert("Gagal simpan memori: " + error.message);
+      } else {
+        onSave(memoryData);
+      }
     };
-
-    const { error } = await supabase.from('memories').insert([memoryData]);
-    if (error) {
-      alert("Gagal simpan memori: " + error.message);
-    } else {
-      onSave(memoryData);
-    }
   };
 
   return (
