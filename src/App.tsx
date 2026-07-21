@@ -1498,7 +1498,7 @@ function MemoryForm({ categories, initial, onSave }) {
       <button type="submit" className="font-mono text-xs uppercase tracking-widest font-bold py-3" style={btnPrimary}>Simpan</button>
     </form>
   );
-}
+
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
@@ -1622,4 +1622,4 @@ function MemoryForm({ categories, initial, onSave }) {
       </button>
     </form>
   );
-
+}
