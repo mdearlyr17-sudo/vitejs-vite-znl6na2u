@@ -1,13 +1,6 @@
-
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
 import { createClient } from '@supabase/supabase-js';
-
-// Ganti dengan URL dan KEY lo dari dashboard Supabase
-const supabaseUrl = 'https://cowhnlntimqkpguwrlxh.supabase.co'; 
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd2hubG50aW1xa3BndXdybHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzE2NTgsImV4cCI6MjA5OTg0NzY1OH0.llNQaxrEBIaSfQMwDkicC-dWqvJUsIc3LXbPqxSk1IQ'; 
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 import {
   Plus,
   X,
@@ -23,6 +16,12 @@ import {
   Trash2,
   ShieldCheck,
 } from "lucide-react";
+
+// Ganti dengan URL dan KEY lo dari dashboard Supabase
+const supabaseUrl = 'https://cowhnlntimqkpguwrlxh.supabase.co'; 
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd2hubG50aW1xa3BndXdybHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzE2NTgsImV4cCI6MjA5OTg0NzY1OH0.llNQaxrEBIaSfQMwDkicC-dWqvJUsIc3LXbPqxSk1IQ'; 
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /* ---------------------------------------------------------
    CEMARA DIVISI BRUTAL — design tokens
@@ -44,6 +43,8 @@ const C = {
   accentDim: "#C93D22",
   pine: "#4A6B4E",
 };
+
+/* ================= DI BAWAH SINI KODINGAN LO NGGAK USAH DIUBAH ================= */
 
 const ADMIN_PINS = ["budi", "fadli"];
 
