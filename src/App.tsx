@@ -1408,8 +1408,11 @@ function MemoryForm({ categories, initial, onSave }) {
     };
 
     const { error } = await supabase.from('memories').insert([memoryData]);
-    if (error) alert("Gagal simpan memori: " + error.message);
-    else onSave(memoryData);
+    if (error) {
+      alert("Gagal simpan memori: " + error.message);
+    } else {
+      onSave(memoryData);
+    }
   };
 
   return (
