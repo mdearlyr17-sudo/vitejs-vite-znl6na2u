@@ -1258,20 +1258,19 @@ function PlanForm({ initial, onSave }) {
 function MemberForm({ initial, onSave }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [photo, setPhoto] = useState(initial?.photo ?? "");
-  const [linkInput, setLinkInput] = useState(""); // Buat nampung link GDrive
+  const [linkInput, setLinkInput] = useState("");
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setPhoto(await fileToDataUrl(file));
-    setLinkInput(""); // Kosongin teks link kalau pilih dari perangkat
+    setLinkInput("");
   };
 
   const handleLinkChange = (e) => {
     const val = e.target.value;
     setLinkInput(val);
     if (val.trim()) {
-      // Otomatis convert link GDrive jadi foto
       setPhoto(parseGDriveLink(val.trim()));
     }
   };
@@ -1280,25 +1279,18 @@ function MemberForm({ initial, onSave }) {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const submit = async (e) => {
-      e.preventDefault();
-      if (!name.trim()) return;
-  
-      const memberData = {
-        id: initial?.id ?? `m${Date.now()}`, // <--- Tambahin ID
-        name: name.trim(),
-        photo: photo || `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`,
-      };
-  
-      // Ganti jadi .upsert()
-      const { error } = await supabase.from('members').upsert([memberData]);
-      
-      if (error) {
-        alert("Gagal simpan ke Supabase: " + error.message);
-      } else {
-        onSave(memberData); 
-      }
+    const memberData = {
+      id: initial?.id ?? `m${Date.now()}`,
+      name: name.trim(),
+      photo: photo || `https://picsum.photos/seed/${encodeURIComponent(name)}/400/400`,
     };
+
+    const { error } = await supabase.from('members').upsert([memberData]);
+    if (error) {
+      alert("Gagal simpan ke Supabase: " + error.message);
+    } else {
+      onSave(memberData);
+    }
   };
 
   return (
@@ -1314,7 +1306,6 @@ function MemberForm({ initial, onSave }) {
         />
       </div>
 
-      {/* OPSI 1: UPLOAD PERANGKAT */}
       <div>
         <FieldLabel>Opsi 1: Pilih Foto dari Perangkat</FieldLabel>
         <input
@@ -1326,7 +1317,6 @@ function MemberForm({ initial, onSave }) {
         />
       </div>
 
-      {/* OPSI 2: LINK GOOGLE DRIVE */}
       <div>
         <FieldLabel>Opsi 2: Atau Tempel Link Google Drive / Web</FieldLabel>
         <input
@@ -1356,6 +1346,155 @@ function MemberForm({ initial, onSave }) {
       <button type="submit" className="font-mono text-xs uppercase tracking-widest font-bold py-3" style={btnPrimary}>
         Simpan
       </button>
+    </form>
+  );
+}
+
+function MemoryForm({ categories, initial, onSave }) {
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [category, setCategory] = useState(initial?.category ?? categories[0]?.id ?? "");
+  const [location, setLocation] = useState(initial?.location ?? "");
+  const [date, setDate] = useState(initial?.date ?? "");
+  const [cover, setCover] = useState(initial?.cover ?? "");
+  const [photos, setPhotos] = useState(initial?.photos ?? []);
+  const [youtubeUrl, setYoutubeUrl] = useState(initial?.youtube_url ?? "");
+  
+  const [coverLinkInput, setCoverLinkInput] = useState("");
+  const [galleryLinkInput, setGalleryLinkInput] = useState("");
+
+  const handleCoverFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCover(await fileToDataUrl(file));
+    setCoverLinkInput("");
+  };
+
+  const handleCoverLinkChange = (e) => {
+    const val = e.target.value;
+    setCoverLinkInput(val);
+    if (val.trim()) setCover(parseGDriveLink(val.trim()));
+  };
+
+  const handleGalleryFiles = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const dataUrls = await Promise.all(files.map(fileToDataUrl));
+    setPhotos((prev) => [...prev, ...dataUrls]);
+  };
+
+  const handleAddGalleryLink = (e) => {
+    e.preventDefault();
+    if (!galleryLinkInput.trim()) return;
+    const directUrl = parseGDriveLink(galleryLinkInput.trim());
+    setPhotos((prev) => [...prev, directUrl]);
+    setGalleryLinkInput("");
+  };
+
+  const removePhoto = (idx) => setPhotos((prev) => prev.filter((_, i) => i !== idx));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    const memoryData = {
+      id: initial?.id ?? `d${Date.now()}`,
+      title: title.trim(),
+      category,
+      location: location.trim() || "Lokasi belum diisi",
+      date: date.trim() || "Tanggal belum diisi",
+      cover: cover || `https://picsum.photos/seed/${encodeURIComponent(title)}/700/900`,
+      photos,
+      youtube_url: youtubeUrl.trim(),
+    };
+
+    const { error } = await supabase.from('memories').upsert([memoryData]);
+
+    if (error) {
+      alert("Gagal simpan memori: " + error.message);
+    } else {
+      onSave(memoryData);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-4">
+      <div>
+        <FieldLabel>Judul</FieldLabel>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2.5 text-sm outline-none" style={inputStyle} placeholder="cth. Trip Dieng" />
+      </div>
+      <div>
+        <FieldLabel>Kategori</FieldLabel>
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-3 py-2.5 text-sm outline-none" style={inputStyle}>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>{cat.label}</option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <FieldLabel>Lokasi</FieldLabel>
+          <input value={location} onChange={(e) => setLocation(e.target.value)} className="w-full px-3 py-2.5 text-sm outline-none" style={inputStyle} placeholder="cth. Dieng" />
+        </div>
+        <div>
+          <FieldLabel>Tanggal</FieldLabel>
+          <input value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-3 py-2.5 text-sm outline-none" style={inputStyle} placeholder="cth. Jun 2026" />
+        </div>
+      </div>
+      <div>
+        <FieldLabel>Link YouTube (Opsional)</FieldLabel>
+        <input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} className="w-full px-3 py-2.5 text-sm outline-none" style={inputStyle} placeholder="cth. https://youtube.com/watch?v=..." />
+      </div>
+
+      <div className="p-3" style={{ background: C.bgAlt, border: `1px solid ${C.border}` }}>
+        <FieldLabel>Foto Sampul (Pilih Salah Satu):</FieldLabel>
+        <input type="file" accept="image/*" onChange={handleCoverFile} className="w-full text-xs font-mono mb-2" style={{ color: C.textMuted }} />
+        <input
+          value={coverLinkInput}
+          onChange={handleCoverLinkChange}
+          className="w-full px-2.5 py-1.5 text-xs outline-none font-mono"
+          style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+          placeholder="Atau tempel Link Google Drive di sini..."
+        />
+        {cover && <img src={cover} alt="preview" className="w-16 h-20 object-cover mt-2" style={{ border: `1px solid ${C.border}` }} />}
+      </div>
+
+      <div className="p-3" style={{ background: C.bgAlt, border: `1px solid ${C.border}` }}>
+        <FieldLabel>Foto Galeri (Bisa dari Perangkat / GDrive):</FieldLabel>
+        <input type="file" accept="image/*" multiple onChange={handleGalleryFiles} className="w-full text-xs font-mono mb-3" style={{ color: C.textMuted }} />
+        
+        <div className="flex gap-2">
+          <input
+            value={galleryLinkInput}
+            onChange={(e) => setGalleryLinkInput(e.target.value)}
+            className="w-full px-2.5 py-1.5 text-xs outline-none font-mono"
+            style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+            placeholder="Tempel Link GDrive foto galeri..."
+          />
+          <button
+            type="button"
+            onClick={handleAddGalleryLink}
+            className="px-3 py-1 text-xs font-mono font-bold uppercase shrink-0"
+            style={{ background: C.pine, color: C.text }}
+          >
+            + Tambah
+          </button>
+        </div>
+
+        {photos.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {photos.map((p, i) => (
+              <div key={i} className="relative">
+                <img src={p} alt="" className="w-14 h-14 object-cover" style={{ border: `1px solid ${C.border}` }} />
+                <button type="button" onClick={() => removePhoto(i)} className="absolute -top-1.5 -right-1.5 rounded-full p-0.5" style={{ background: C.accent, color: C.bg }}>
+                  <X size={10} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button type="submit" className="font-mono text-xs uppercase tracking-widest font-bold py-3" style={btnPrimary}>Simpan</button>
     </form>
   );
 }
